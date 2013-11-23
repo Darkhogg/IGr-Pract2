@@ -13,20 +13,24 @@ else
 endif
 
 # object files have corresponding source files
-OBJS= main.o BounceScene.o
+OBJS= main.o BounceScene.o Ball.o SceneObstacle.o TriangleObstacle.o CircleObstacle.o
 CXX=g++
 ifeq ($(MODE), prod)
 	EXTRA_FLAGS= -O3 -funroll-loops
+else
+	EXTRA_FLAGS= -g
 endif
-COMPILER_FLAGS= -g -std=c++11 $(EXTRA_FLAGS)
+COMPILER_FLAGS= -std=c++11 $(EXTRA_FLAGS)
 INCLUDE= $(SDL_INC) $(OPENGL_INC)
 LIBS= $(SDL_LIB) $(OPENGL_LIB)
 
 EXEC= bounce
 
-$(EXEC): $(OBJS)
-	$(MAKE) -C skel
+$(EXEC): _makeskel $(OBJS)
 	$(CXX) $(COMPILER_FLAGS) -o $(EXEC) $(OBJS) skel/*.o $(LIBS)
+
+_makeskel:
+	$(MAKE) -C skel
 
 %.o:    %.cpp
 	$(CXX) -c $(COMPILER_FLAGS) -o $@ $< $(INCLUDE)
