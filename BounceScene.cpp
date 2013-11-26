@@ -1,11 +1,16 @@
+/**
+ * @author Daniel Escoz Solana
+ */
 #include "BounceScene.hpp"
 
 #include "SceneObstacle.hpp"
 #include "CircleObstacle.hpp"
+#include "PolygonObstacle.hpp"
 #include "TriangleObstacle.hpp"
 
 #include <iostream>
 #include <memory>
+#include <array>
 
 void BounceScene::onInitialize () {
   setTitle("Bouncing Balls");
@@ -65,7 +70,7 @@ void BounceScene::onMouseDown (int button) {
 
     /* Right click */
     case MOUSE_RIGHT: {
-      /** NO BALLS RIGHT NOW *///break;
+      /** NO BALLS RIGHT NOW */break;
       for (auto i = 0; i < 3; i++) {
         balls.push_back(Ball::withRandSpeed(getMouseWorldPosition(), 8 + rand() % 8));
       }
@@ -116,7 +121,7 @@ void BounceScene::onKeyDown (int code) {
     } break;
 
     case KEY_W: {
-      for (auto i = 0; i < 1000; i++) {
+      for (auto i = 0; i < 000; i++) {
         balls.push_back(Ball::withRandSpeed(getMouseWorldPosition(), 10));
       }
     } break;
@@ -145,13 +150,56 @@ void BounceScene::generateObstacles () {
     Vect(view.left, view.bottom), Vect(view.right, view.top));
   obstacles.push_back(sceneObst);
 
-  for (int i = 0; i < 4; i++) {
+  /* Polygons */
+  auto rMin = M_PI/8;
+  auto rMax = M_PI/2;
+  for (int i = 0; i < 0; i++) {
+    auto r = 20 + (rand() % 60);
+    auto x = view.left + r + (rand() % (width() - 2*r));
+    auto y = view.bottom + r + (rand() % (height() - 2*r));
+
+    auto aMin = rand() / (double) RAND_MAX * rMin;
+    auto ang = aMin;
+
+    std::vector<Vect> points;
+    while (ang < 2*M_PI - rMin + aMin) {
+      points.push_back(Vect(x + r * cos(ang), y + r * sin(ang)));
+      ang += rMin + ((rand() / (double) RAND_MAX) * (rMax-rMin));
+    }
+
+    auto polyObst = std::make_shared<PolygonObstacle>(points);
+    obstacles.push_back(polyObst);
+  }
+
+  /* Circles */
+  for (int i = 0; i < 3; i++) {
     auto r = (rand() % 30) + 20;
     auto x = view.left + r + (rand() % (width() - 2*r));
     auto y = view.bottom + r + (rand() % (height() - 2*r));
     auto circleObst = std::make_shared<CircleObstacle>(Vect(x, y), r);
     obstacles.push_back(circleObst);
   }
+
+  /* Triangles */
+  for (int i = 0; i < 3; i++) {
+    auto r = (rand() % 50) + 40;
+    auto x = view.left + r + (rand() % (width() - 2*r));
+    auto y = view.bottom + r + (rand() % (height() - 2*r));
+
+    std::array<Vect, 3> pts;
+
+    std::vector<Vect> points;
+    auto ai = (2*M_PI/3) * (rand() / (double) RAND_MAX);
+    for (auto i = 0; i < 3; i++) {
+      auto ang = ai + i * (2*M_PI/3)
+        + 0.5 + ((2*M_PI/3 - 1) * (rand() / (double) RAND_MAX));
+      pts[i] = Vect(x + r * cos(ang), y + r * sin(ang));
+    }
+
+    auto triObst = std::make_shared<TriangleObstacle>(pts[0], pts[1], pts[2]);
+    obstacles.push_back(triObst);
+  }
+
 }
 
 void BounceScene::onResize (int width, int height) {

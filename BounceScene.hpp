@@ -1,3 +1,6 @@
+/**
+ * @author Daniel Escoz Solana
+ */
 #ifndef __BOUNCE_SCENE__H__
 #define __BOUNCE_SCENE__H__
 

@@ -1,3 +1,6 @@
+/**
+ * @author Daniel Escoz Solana
+ */
 #ifndef __OBSTACLE__H__
 #define __OBSTACLE__H__
 

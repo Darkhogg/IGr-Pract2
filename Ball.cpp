@@ -1,3 +1,6 @@
+/**
+ * @author Daniel Escoz Solana
+ */
 #include "Ball.hpp"
 
 #include <cmath>

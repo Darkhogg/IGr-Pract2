@@ -13,7 +13,7 @@ else
 endif
 
 # object files have corresponding source files
-OBJS= main.o BounceScene.o Ball.o SceneObstacle.o TriangleObstacle.o CircleObstacle.o
+OBJS= main.o BounceScene.o Ball.o SceneObstacle.o TriangleObstacle.o PolygonObstacle.o CircleObstacle.o
 CXX=g++
 ifeq ($(MODE), prod)
 	EXTRA_FLAGS= -O3 -funroll-loops

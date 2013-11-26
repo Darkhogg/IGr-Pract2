@@ -1,19 +1,18 @@
 /**
  * @author Daniel Escoz Solana
  */
-#ifndef __Circle_OBSTACLE__H__
-#define __Circle_OBSTACLE__H__
+#ifndef __POLYGON_OBSTACLE__H__
+#define __POLYGON_OBSTACLE__H__
 
 #include "skel/skel.h"
 #include "Obstacle.hpp"
 
-class CircleObstacle : public Obstacle {
+class PolygonObstacle : public Obstacle {
   private:
-    Vect _center;
-    Vect::Component _rad;
-  
+    std::vector<Vect> _points;
+    
   public:
-    CircleObstacle (Vect center, Vect::Component radius) : _center(center), _rad(radius) {}
+    PolygonObstacle (const std::vector<Vect>& points) : _points(points) {}
 
     void draw ();
     bool collide (

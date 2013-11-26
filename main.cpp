@@ -1,3 +1,6 @@
+/**
+ * @author Daniel Escoz Solana
+ */
 #include <memory>
 
 #include "skel/skel.h"
