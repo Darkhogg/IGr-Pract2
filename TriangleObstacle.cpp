@@ -5,6 +5,9 @@
 #include <iostream>
 
 void TriangleObstacle::draw () {
+  Obstacle::draw();
+
+  glLineWidth(1);
   glColor3f(.6f, .8f, .6f);
   glBegin(GL_POLYGON);
   for (auto it = _points.begin(); it != _points.end(); ++it) {
@@ -20,10 +23,20 @@ void TriangleObstacle::draw () {
   glEnd();
 }
 
-bool TriangleObstacle::collide (
+bool TriangleObstacle::performCollide (
   Vect pos, Vect::Component rad, Vect spd, float delta,
   Vect& outPos, Vect& outSpd, float& outDelta
 ) {
+  if (rad >= Ball::MIN_PARTICLE_RADIUS) {
+    std::vector<Vect> vec;
+    vec.push_back(_points[0]);
+    vec.push_back(_points[1]);
+    vec.push_back(_points[2]);
+
+    PolygonObstacle poly (vec);
+    return poly.collide(pos, rad, spd, delta, outPos, outSpd, outDelta);
+  }
+
   std::array<Vect::Component, 3> dists, projs;
   std::array<int, 3> signs;
 

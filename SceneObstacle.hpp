@@ -16,7 +16,7 @@ class SceneObstacle : public Obstacle {
     SceneObstacle (Vect bl, Vect tr)
       : _left(bl.x()), _bottom(bl.y()), _top(tr.y()), _right(tr.x()) {}
 
-    bool collide (
+    bool performCollide (
       Vect pos, Vect::Component rad, Vect spd, float delta,
       Vect& outPos, Vect& outSpd, float& outDelta);
     void draw ();

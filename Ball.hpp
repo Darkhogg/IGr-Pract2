@@ -10,12 +10,13 @@
 
 class Ball {
   private:
-    const int MIN_PARTICLE_RADIUS = 2; 
 
     Vect _pos, _dir, _acc;
     Vect::Component _rad;
 
   public:
+    static const int MIN_PARTICLE_RADIUS = 2; 
+
     Ball (Vect pos, Vect dir, Vect::Component rad) : _pos(pos), _dir(dir), _rad(rad) {}
     virtual ~Ball () {}
 

@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-bool SceneObstacle::collide (
+bool SceneObstacle::performCollide (
   Vect pos, Vect::Component rad, Vect spd, float delta,
   Vect& outPos, Vect& outSpd, float& outDelta
 ) {

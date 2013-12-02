@@ -15,6 +15,14 @@
 void BounceScene::onInitialize () {
   setTitle("Bouncing Balls");
   generateObstacles();
+
+  glEnable(GL_MULTISAMPLE);
+  glEnable(GL_LINE_SMOOTH);
+  glEnable(GL_POLYGON_SMOOTH);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  mode = M_BALLS;
 }
 
 void BounceScene::onUpdate (float delta) {
@@ -50,29 +58,115 @@ void BounceScene::onDraw () {
   for (auto it = balls.begin(); it != balls.end(); ++it) {
     it->draw();
   }
+
+  if (mode == M_OBSTACLE && points.size() > 0) {
+    glLineWidth(3);
+    glColor3f(.8f, .8f, .8f);
+    glBegin(GL_LINE_STRIP);
+    for (auto it = points.begin(); it != points.end(); it++) {
+      glVertex2f(it->x(), it->y());
+    }
+    glEnd();
+
+    auto mv = getMouseWorldPosition();
+    auto fst = points.front();
+    auto lst = points.back();
+
+    if (points.size() > 1) {
+
+      // Check validity
+      if (checkPolyValidity()) {
+        glColor3f(.2f, .6f, .2f);
+      } else {
+        glColor3f(.6f, .2f, .2f);
+      }
+
+      glLineWidth(2);
+      glBegin(GL_LINE_STRIP);
+      glVertex2f(fst.x(), fst.y());
+      glVertex2f(mv.x(), mv.y());
+      glVertex2f(lst.x(), lst.y());
+      glEnd();
+
+    } else {
+      glLineWidth(2);
+      glColor3f(.2f, .6f, .2f);
+      glBegin(GL_LINE_STRIP);
+      glVertex2f(fst.x(), fst.y());
+      glVertex2f(mv.x(), mv.y());
+      glEnd();
+
+      auto center = (points[0] + mv) / 2;
+      auto radius = (points[0] - center).mod();
+      int pnum = std::max(6, (int)(radius * 3));
+      auto step = 2 * M_PI / pnum;
+
+      glColor3f(.3f, .3f, .3f);
+      glBegin(GL_LINE_LOOP);
+        for (int i = 0; i < pnum; i++) {
+          glVertex2f(
+            center.x() + (radius * cos(i * step)),
+            center.y() + (radius * sin(i * step))
+          );
+        }
+      glEnd();
+    }
+  }
 }
 
 void BounceScene::onMouseDown (int button) {
+
   switch (button) {
 
     /* Left click */
     case MOUSE_LEFT: {
       /* Generate 8 particles moving at random directions and speeds */
-      for (auto i = 0; i < 24; i++) {
-        balls.push_back(Ball::withRandSpeed(getMouseWorldPosition(), 0));
+      if (mode == M_BALLS) {  
+        for (auto i = 0; i < 24; i++) {
+          balls.push_back(Ball::withRandSpeed(getMouseWorldPosition(), 0));
+        }
+      } else {
+        if (checkPolyValidity()) {
+          points.push_back(getMouseWorldPosition());
+        }
       }
     } break;
 
     /* Left click */
     case MOUSE_CENTER: {
-      balls.push_back(Ball(getMouseWorldPosition(), Vect(42, 42), 0));
+      if (mode == M_BALLS) {
+        balls.push_back(Ball(getMouseWorldPosition(), Vect(42, 42), 16));
+      }
     } break;
 
     /* Right click */
     case MOUSE_RIGHT: {
-      /** NO BALLS RIGHT NOW */break;
-      for (auto i = 0; i < 3; i++) {
-        balls.push_back(Ball::withRandSpeed(getMouseWorldPosition(), 8 + rand() % 8));
+      if (mode == M_BALLS) {
+        for (auto i = 0; i < 3; i++) {
+          balls.push_back(Ball::withRandSpeed(getMouseWorldPosition(), 4 + rand() % 8));
+        }
+      } else {
+        if (checkPolyValidity()) {
+          points.push_back(getMouseWorldPosition());
+          if (points.size() == 2) {
+            // Create a circle
+            auto center = (points[0] + points[1]) / 2;
+            auto radius = (center - points[0]).mod();
+            auto circleObst = std::make_shared<CircleObstacle>(center, radius);
+            obstacles.push_back(circleObst);
+
+          } else if (points.size() == 3) {
+            // Create a triangle
+            auto triObst = std::make_shared<TriangleObstacle>(points[0], points[1], points[2]);
+            obstacles.push_back(triObst);
+
+          } else if (points.size() > 3) {
+            // Create a polygon
+            auto polyObst = std::make_shared<PolygonObstacle>(points);
+            obstacles.push_back(polyObst);
+          }
+          points.clear();
+        }
       }
     }
   }
@@ -90,10 +184,12 @@ void BounceScene::onKeyDown (int code) {
 
     case KEY_R: {
       balls.clear();
+    } break;
+
+    case KEY_T: {
       obstacles.clear();
       generateObstacles();
     } break;
-
 
 
     case KEY_1: {
@@ -121,8 +217,8 @@ void BounceScene::onKeyDown (int code) {
     } break;
 
     case KEY_W: {
-      for (auto i = 0; i < 000; i++) {
-        balls.push_back(Ball::withRandSpeed(getMouseWorldPosition(), 10));
+      for (auto i = 0; i < 1000; i++) {
+        balls.push_back(Ball::withRandSpeed(getMouseWorldPosition(), 4 + rand() % 8));
       }
     } break;
 
@@ -139,6 +235,23 @@ void BounceScene::onKeyDown (int code) {
         it->acc(Vect(0, 0, 0));
       }
     } break;
+
+
+    case KEY_RCTRL:
+    case KEY_LCTRL: {
+      points.clear();
+      mode = M_OBSTACLE;
+    } break;
+  }
+}
+
+void BounceScene::onKeyUp(int code) {
+  switch (code) {
+    case KEY_RCTRL:
+    case KEY_LCTRL: {
+      mode = M_BALLS;
+      points.clear();
+    } break;
   }
 }
 
@@ -149,57 +262,6 @@ void BounceScene::generateObstacles () {
   auto sceneObst = std::make_shared<SceneObstacle>(
     Vect(view.left, view.bottom), Vect(view.right, view.top));
   obstacles.push_back(sceneObst);
-
-  /* Polygons */
-  auto rMin = M_PI/8;
-  auto rMax = M_PI/2;
-  for (int i = 0; i < 0; i++) {
-    auto r = 20 + (rand() % 60);
-    auto x = view.left + r + (rand() % (width() - 2*r));
-    auto y = view.bottom + r + (rand() % (height() - 2*r));
-
-    auto aMin = rand() / (double) RAND_MAX * rMin;
-    auto ang = aMin;
-
-    std::vector<Vect> points;
-    while (ang < 2*M_PI - rMin + aMin) {
-      points.push_back(Vect(x + r * cos(ang), y + r * sin(ang)));
-      ang += rMin + ((rand() / (double) RAND_MAX) * (rMax-rMin));
-    }
-
-    auto polyObst = std::make_shared<PolygonObstacle>(points);
-    obstacles.push_back(polyObst);
-  }
-
-  /* Circles */
-  for (int i = 0; i < 3; i++) {
-    auto r = (rand() % 30) + 20;
-    auto x = view.left + r + (rand() % (width() - 2*r));
-    auto y = view.bottom + r + (rand() % (height() - 2*r));
-    auto circleObst = std::make_shared<CircleObstacle>(Vect(x, y), r);
-    obstacles.push_back(circleObst);
-  }
-
-  /* Triangles */
-  for (int i = 0; i < 3; i++) {
-    auto r = (rand() % 50) + 40;
-    auto x = view.left + r + (rand() % (width() - 2*r));
-    auto y = view.bottom + r + (rand() % (height() - 2*r));
-
-    std::array<Vect, 3> pts;
-
-    std::vector<Vect> points;
-    auto ai = (2*M_PI/3) * (rand() / (double) RAND_MAX);
-    for (auto i = 0; i < 3; i++) {
-      auto ang = ai + i * (2*M_PI/3)
-        + 0.5 + ((2*M_PI/3 - 1) * (rand() / (double) RAND_MAX));
-      pts[i] = Vect(x + r * cos(ang), y + r * sin(ang));
-    }
-
-    auto triObst = std::make_shared<TriangleObstacle>(pts[0], pts[1], pts[2]);
-    obstacles.push_back(triObst);
-  }
-
 }
 
 void BounceScene::onResize (int width, int height) {
@@ -210,4 +272,40 @@ void BounceScene::onResize (int width, int height) {
 
     obstacles[0] = sceneObst;
   }
+}
+
+void BounceScene::onMouseMove (int x, int y) {
+
+}
+
+bool BounceScene::checkPolyValidity () {
+  if (points.size() < 2) {
+    return true;
+  }
+
+  auto mv = getMouseWorldPosition();
+
+  auto vec = points;
+  vec.push_back(mv);
+
+  Vect pct;
+  for (size_t i = 1; i < vec.size(); ++i) {
+    pct += vec[i];
+  }
+  pct /= vec.size();
+
+  auto p = (vec[0] - vec[1]).perp_left_z0().dot(vec[0] - vec[2]);
+
+  for (size_t i = 1; i < vec.size(); ++i) {
+    auto j = (i + 1) % vec.size();
+    auto k = (j + 1) % vec.size();
+
+    auto pp = (vec[i] - vec[j]).perp_left_z0().dot(vec[i] - vec[k]);
+
+    if (pp <= 0) {
+      return false;
+    }
+  }
+
+  return true;
 }

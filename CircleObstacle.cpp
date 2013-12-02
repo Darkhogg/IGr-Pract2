@@ -6,10 +6,13 @@
 #include <iostream>
 
 void CircleObstacle::draw () {
+  Obstacle::draw();
+  
   auto radius = _rad;
   int points = std::max(6, (int)(radius * 3));
   auto step = 2 * M_PI / points;
 
+  glLineWidth(1);
   glColor3f(.6f, .6f, .8f);
   glBegin(GL_POLYGON);
   for (int i = 0; i < points; i++) {
@@ -31,11 +34,11 @@ void CircleObstacle::draw () {
   glEnd();
 }
 
-bool CircleObstacle::collide (
+bool CircleObstacle::performCollide (
   Vect pos, Vect::Component rad, Vect spd, float delta,
   Vect& outPos, Vect& outSpd, float& outDelta
 ) {
-  auto mrad = rad+_rad;
+  auto mrad = rad + _rad;
   auto dist = (_center - pos).mod();
 
   if (dist < mrad) {

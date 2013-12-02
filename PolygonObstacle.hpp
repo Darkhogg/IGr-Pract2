@@ -11,11 +11,18 @@ class PolygonObstacle : public Obstacle {
   private:
     std::vector<Vect> _points;
     
+    PolygonObstacle inflate (Vect::Component size);
+    
   public:
-    PolygonObstacle (const std::vector<Vect>& points) : _points(points) {}
+    PolygonObstacle (const std::vector<Vect>& points) : _points(points) {
+      bb_clear();
+      for (auto it = _points.begin(); it != _points.end(); ++it) {
+        bb_add_point(*it);
+      }
+    }
 
     void draw ();
-    bool collide (
+    bool performCollide (
       Vect pos, Vect::Component rad, Vect spd, float delta,
       Vect& outPos, Vect& outSpd, float& outDelta);
 };
