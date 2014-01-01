@@ -42,6 +42,8 @@ void BounceScene::onUpdate (float delta) {
           itb->pos(pos);
           itb->speed(spd);
 
+          itb->collided();
+
           coll = (dlt - rest > 0.001f); // Break same-point collisions
         }
       }

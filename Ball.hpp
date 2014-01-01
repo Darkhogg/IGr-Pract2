@@ -13,12 +13,18 @@ class Ball {
 
     Vect _pos, _dir, _acc;
     Vect::Component _rad;
+    Vect::Component _ang, _angspd;
 
   public:
     static const int MIN_PARTICLE_RADIUS = 2; 
 
-    Ball (Vect pos, Vect dir, Vect::Component rad) : _pos(pos), _dir(dir), _rad(rad) {}
+    Ball (Vect pos, Vect dir, Vect::Component rad)
+        : _pos(pos), _dir(dir), _rad(rad), _ang(0), _angspd(90) {}
     virtual ~Ball () {}
+
+    void collided () {
+        _angspd = -_angspd;
+    }
 
     void update (float delta);
     void draw () const;

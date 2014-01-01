@@ -15,6 +15,8 @@ Ball Ball::withRandSpeed (Vect pos, int rad) {
 void Ball::update (float delta) {
   _pos += _dir * delta;
   _dir += _acc * delta;
+
+  _ang += _angspd * delta;
 }
 
 void Ball::draw () const {
@@ -22,13 +24,27 @@ void Ball::draw () const {
   int points = std::max(6, (int)(radius * 2));
   auto step = 2 * M_PI / points;
 
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+
+  glLoadIdentity();
+  glTranslated(_pos.x(), _pos.y(), 0);
+  glScaled(radius, radius, 1);
+  glRotated(_ang, 0, 0, 1);
+
   glColor3f(1, 1 ,1);
   glBegin(GL_POLYGON);
   for (int i = 0; i < points; i++) {
-    glVertex2f(
-      _pos.x() + (radius * cos(i * step)),
-      _pos.y() + (radius * sin(i * step))
-    );
+    glVertex2f(cos(i * step), sin(i * step));
   }
   glEnd();
+
+  glColor3f(1, 0, 0);
+  glLineWidth(2.f);
+  glBegin(GL_LINES);
+  glVertex2f(0, 0);
+  glVertex2f(1, 0);
+  glEnd();
+
+  glPopMatrix();
 }
