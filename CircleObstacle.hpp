@@ -15,14 +15,14 @@ class CircleObstacle : public Obstacle {
   public:
     CircleObstacle (Vect center, Vect::Component radius) : _center(center), _rad(radius) {
       bb_clear();
-      bb_add_point(Vect(center.x() - radius, center.y() - radius));
-      bb_add_point(Vect(center.x() + radius, center.y() + radius));
+      bb_add_point(Vect(center.x() - radius, center.y() - radius, 1.f));
+      bb_add_point(Vect(center.x() + radius, center.y() + radius, 1.f));
     }
 
     void draw ();
     bool performCollide (
       Vect pos, Vect::Component rad, Vect spd, float delta,
-      Vect& outPos, Vect& outSpd, float& outDelta);
+      Vect& outPos, Vect& outSpd, float& outDelta, Vect& norm);
 };
 
 #endif

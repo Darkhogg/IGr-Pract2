@@ -24,7 +24,7 @@ class PolygonObstacle : public Obstacle {
     void draw ();
     bool performCollide (
       Vect pos, Vect::Component rad, Vect spd, float delta,
-      Vect& outPos, Vect& outSpd, float& outDelta);
+      Vect& outPos, Vect& outSpd, float& outDelta, Vect& norm);
 };
 
 #endif

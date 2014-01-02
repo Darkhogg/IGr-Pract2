@@ -36,7 +36,7 @@ void CircleObstacle::draw () {
 
 bool CircleObstacle::performCollide (
   Vect pos, Vect::Component rad, Vect spd, float delta,
-  Vect& outPos, Vect& outSpd, float& outDelta
+  Vect& outPos, Vect& outSpd, float& outDelta, Vect& norm
 ) {
   auto mrad = rad + _rad;
   auto dist = (_center - pos).mod();
@@ -87,8 +87,10 @@ bool CircleObstacle::performCollide (
   outDelta = (1 - ((outPos - pos).mod()) / spd.mod()) * delta;
   outPos = _center + (outPos - _center).normalized() * (mrad + 0.001);
 
-  auto norm = (outPos - _center).normalized(); // Normalized normal
+  norm = (outPos - _center).normalized(); // Normalized normal
   outSpd = spd - norm.project(spd) * 2;
+
+  std::cout << norm.yaw() << std::flush;
 
   return true;
 }

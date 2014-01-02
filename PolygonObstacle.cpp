@@ -35,10 +35,10 @@ void PolygonObstacle::draw () {
 
 bool PolygonObstacle::performCollide (
   Vect pos, Vect::Component rad, Vect spd, float delta,
-  Vect& outPos, Vect& outSpd, float& outDelta
+  Vect& outPos, Vect& outSpd, float& outDelta, Vect& norm
 ) {
   if (rad >= Ball::MIN_PARTICLE_RADIUS) {
-    return inflate(rad).performCollide(pos, 0, spd, delta, outPos, outSpd, outDelta);
+    return inflate(rad).performCollide(pos, 0, spd, delta, outPos, outSpd, outDelta, norm);
   }
 
   Vect::Component tin = -DBL_MAX;
@@ -128,7 +128,7 @@ PolygonObstacle PolygonObstacle::inflate (Vect::Component size) {
     auto step = (angTo - angFrom) / (points - 1);
     for (int p = 1; p < points - 1; p++) {
       auto ang = angFrom + step * p;
-      pts.push_back(_points[j] + Vect(size * cos(ang), size * sin(ang)));
+      pts.push_back(_points[j] + Vect(size * cos(ang), size * sin(ang), 1.f));
     }
   }
 

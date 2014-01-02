@@ -48,9 +48,14 @@ void Obstacle::bb_draw () {
 bool Obstacle::collide (Vect pos, Vect::Component rad, Vect spd, float delta,
   Vect& outPos, Vect& outSpd, float& outDelta)
 {
+  // Ensure vectors and points are vectors and points
+  pos.w(1.f);
+  spd.w(0.f);
+
   if (!bb_inside(pos, rad + spd.mod() * delta)) {
     return false;
   }
 
-  return performCollide(pos, rad, spd, delta, outPos, outSpd, outDelta);
+  Vect norm;
+  return performCollide(pos, rad, spd, delta, outPos, outSpd, outDelta, norm);
 }

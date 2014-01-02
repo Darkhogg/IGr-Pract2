@@ -25,7 +25,7 @@ void TriangleObstacle::draw () {
 
 bool TriangleObstacle::performCollide (
   Vect pos, Vect::Component rad, Vect spd, float delta,
-  Vect& outPos, Vect& outSpd, float& outDelta
+  Vect& outPos, Vect& outSpd, float& outDelta, Vect& norm
 ) {
   if (rad >= Ball::MIN_PARTICLE_RADIUS) {
     std::vector<Vect> vec;
@@ -76,7 +76,7 @@ bool TriangleObstacle::performCollide (
   }
 
   size_t iMin = 0;
-  auto norm = normals[0];
+  norm = normals[0];
   auto tMin = thits[0];
   auto tMax = tMin;
 

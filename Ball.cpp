@@ -9,7 +9,7 @@
 Ball Ball::withRandSpeed (Vect pos, int rad) {
   auto dir = (rand() / (double) RAND_MAX) * M_PI * 2;
   auto mod = (rand() / (double) RAND_MAX) * 150 + 50;
-  return Ball(pos, Vect(mod*cos(dir), mod*sin(dir), 0), rad);
+  return Ball(pos, Vect(mod*cos(dir), mod*sin(dir), 0.f), rad);
 }
 
 void Ball::update (float delta) {

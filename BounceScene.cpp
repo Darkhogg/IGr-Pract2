@@ -7,6 +7,7 @@
 #include "CircleObstacle.hpp"
 #include "PolygonObstacle.hpp"
 #include "TriangleObstacle.hpp"
+#include "EllipseObstacle.hpp"
 
 #include <iostream>
 #include <memory>
@@ -137,7 +138,7 @@ void BounceScene::onMouseDown (int button) {
     /* Left click */
     case MOUSE_CENTER: {
       if (mode == M_BALLS) {
-        balls.push_back(Ball(getMouseWorldPosition(), Vect(42, 42), 16));
+        balls.push_back(Ball(getMouseWorldPosition(), Vect(42, 42, 0.f), 16));
       }
     } break;
 
@@ -213,7 +214,7 @@ void BounceScene::onKeyDown (int code) {
 
 
     case KEY_Q: {
-      for (auto i = 0; i < 10000; i++) {
+      for (auto i = 0; i < 1000; i++) {
         balls.push_back(Ball::withRandSpeed(getMouseWorldPosition(), 0));
       }
     } break;
@@ -262,15 +263,19 @@ void BounceScene::generateObstacles () {
 
   auto view = cam().view(width(), height());
   auto sceneObst = std::make_shared<SceneObstacle>(
-    Vect(view.left, view.bottom), Vect(view.right, view.top));
+    Vect(view.left, view.bottom, 1.f), Vect(view.right, view.top, 1.f));
   obstacles.push_back(sceneObst);
+
+  auto ellipseObst = std::make_shared<EllipseObstacle>(
+    Vect(20, 20, 1.f), 100, 50);
+  obstacles.push_back(ellipseObst);
 }
 
 void BounceScene::onResize (int width, int height) {
   if (obstacles.size() >= 1) {
     auto view = cam().view(width, height);
     auto sceneObst = std::make_shared<SceneObstacle>(
-      Vect(view.left, view.bottom), Vect(view.right, view.top));
+      Vect(view.left, view.bottom, 1.f), Vect(view.right, view.top, 1.f));
 
     obstacles[0] = sceneObst;
   }

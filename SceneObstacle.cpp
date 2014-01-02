@@ -7,7 +7,7 @@
 
 bool SceneObstacle::performCollide (
   Vect pos, Vect::Component rad, Vect spd, float delta,
-  Vect& outPos, Vect& outSpd, float& outDelta
+  Vect& outPos, Vect& outSpd, float& outDelta, Vect& norm
 ) {
   auto dest = pos + spd * delta;
 
@@ -48,25 +48,25 @@ bool SceneObstacle::performCollide (
   if (outLeft) {
     outDelta = delta - dltLeft;
     outPos = pos + spd * dltLeft;
-    outSpd = Vect(-spd.x(), spd.y());
+    outSpd = Vect(-spd.x(), spd.y(), 0.f);
     return true;
 
   } else if (outRight) {
     outDelta = delta - dltRight;
     outPos = pos + spd * dltRight;
-    outSpd = Vect(-spd.x(), spd.y());
+    outSpd = Vect(-spd.x(), spd.y(), 0.f);
     return true;
 
   } else if (outTop) {
     outDelta = delta - dltTop;
     outPos = pos + spd * dltTop;
-    outSpd = Vect(spd.x(), -spd.y());
+    outSpd = Vect(spd.x(), -spd.y(), 0.f);
     return true;
 
   } else/* if (outBottom) */{
     outDelta = delta - dltBottom;
     outPos = pos + spd * dltBottom;
-    outSpd = Vect(spd.x(), -spd.y());
+    outSpd = Vect(spd.x(), -spd.y(), 0.f);
     return true;
   }
 }

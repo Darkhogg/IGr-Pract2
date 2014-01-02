@@ -30,7 +30,7 @@ class Obstacle {
     virtual void draw () { /*bb_draw();*/ }
     virtual bool performCollide (
       Vect pos, Vect::Component rad, Vect spd, float delta,
-      Vect& outPos, Vect& outSpd, float& outDelta) = 0;
+      Vect& outPos, Vect& outSpd, float& outDelta, Vect& norm) = 0;
 
     virtual bool collide (
       Vect pos, Vect::Component rad, Vect spd, float delta,
