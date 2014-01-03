@@ -13,7 +13,7 @@
 #include <vector>
 
 enum Mode {
-    M_BALLS, M_OBSTACLE
+    M_BALLS, M_OBSTACLE, M_ELLIPSE
 };
 
 class BounceScene : public Scene {
@@ -33,6 +33,7 @@ class BounceScene : public Scene {
     void onUpdate (float time);
     void onDraw ();
     void onMouseDown (int button);
+    void onMouseUp (int button);
     void onMouseMove (int x, int y);
     void onKeyDown (int code);
     void onKeyUp (int code);

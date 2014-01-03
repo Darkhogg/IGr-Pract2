@@ -62,7 +62,7 @@ void BounceScene::onDraw () {
     it->draw();
   }
 
-  if (mode == M_OBSTACLE && points.size() > 0) {
+  if ((mode == M_OBSTACLE || mode == M_ELLIPSE) && points.size() > 0) {
     glLineWidth(3);
     glColor3f(.8f, .8f, .8f);
     glBegin(GL_LINE_STRIP);
@@ -75,7 +75,7 @@ void BounceScene::onDraw () {
     auto fst = points.front();
     auto lst = points.back();
 
-    if (points.size() > 1) {
+    if (mode == M_OBSTACLE && points.size() > 1) {
 
       // Check validity
       if (checkPolyValidity()) {
@@ -91,28 +91,45 @@ void BounceScene::onDraw () {
       glVertex2f(lst.x(), lst.y());
       glEnd();
 
-    } else {
-      glLineWidth(2);
-      glColor3f(.2f, .6f, .2f);
-      glBegin(GL_LINE_STRIP);
-      glVertex2f(fst.x(), fst.y());
-      glVertex2f(mv.x(), mv.y());
-      glEnd();
+    }
 
-      auto center = (points[0] + mv) / 2;
+    if (points.size() == 1 || mode == M_ELLIPSE) {
+      auto edp = (points.size() == 2) ? lst : mv;
+
+
+      auto center = (points[0] + edp) / 2;
       auto radius = (points[0] - center).mod();
       int pnum = std::max(6, (int)(radius * 3));
       auto step = 2 * M_PI / pnum;
 
+      auto r2 = radius;
+
+      if (mode == M_ELLIPSE && (mv-lst).mod() > 16) {
+        r2 = (lst - fst).perp_left_z0().project(mv - fst).mod();
+      }
+
+      glPushMatrix();
+      glTranslated(center.x(), center.y(), 0.d);
+      glRotated(atan2(edp.y()-fst.y(), edp.x()-fst.x()) * 180.d / M_PI, 0.d, 0.d, 1.d);
+      glScaled(radius, r2, 1.d);
+
+      glLineWidth(2);
+      glColor3f(.2f, .6f, .2f);
+      glBegin(GL_LINE_STRIP);
+      glVertex2f(-1.f, 0);
+      glVertex2f(1.f, 0);
+      //glVertex2f(fst.x(), fst.y());
+      //glVertex2f(mv.x(), mv.y());
+      glEnd();
+
       glColor3f(.3f, .3f, .3f);
       glBegin(GL_LINE_LOOP);
         for (int i = 0; i < pnum; i++) {
-          glVertex2f(
-            center.x() + (radius * cos(i * step)),
-            center.y() + (radius * sin(i * step))
-          );
+          glVertex2f(cos(i * step), sin(i * step));
         }
       glEnd();
+
+      glPopMatrix();
     }
   }
 }
@@ -150,13 +167,11 @@ void BounceScene::onMouseDown (int button) {
         }
       } else {
         if (checkPolyValidity()) {
+          bool clear = true;
           points.push_back(getMouseWorldPosition());
           if (points.size() == 2) {
-            // Create a circle
-            auto center = (points[0] + points[1]) / 2;
-            auto radius = (center - points[0]).mod();
-            auto circleObst = std::make_shared<CircleObstacle>(center, radius);
-            obstacles.push_back(circleObst);
+            mode = M_ELLIPSE;
+            clear = false;
 
           } else if (points.size() == 3) {
             // Create a triangle
@@ -168,10 +183,38 @@ void BounceScene::onMouseDown (int button) {
             auto polyObst = std::make_shared<PolygonObstacle>(points);
             obstacles.push_back(polyObst);
           }
-          points.clear();
+
+          if (clear) {
+            points.clear();
+          }
         }
       }
     }
+  }
+}
+
+void BounceScene::onMouseUp (int button) {
+  if (mode == M_ELLIPSE && button == MOUSE_RIGHT) {
+    // Create a circle
+    auto mv = getMouseWorldPosition();
+    auto center = (points[0] + points[1]) / 2;
+    auto radius = (center - points[0]).mod();
+
+    if ((mv - points[1]).mod() < 16) {
+      auto circleObst = std::make_shared<CircleObstacle>(center, radius);
+      obstacles.push_back(circleObst);
+
+    } else {
+      auto r2 = (points[1] - points[0]).perp_left_z0().project(mv - points[0]).mod();
+      auto ang = (points[1] - points[0]).yaw();
+
+      auto ellipseObst = std::make_shared<EllipseObstacle>(center, radius, r2, ang);
+      obstacles.push_back(ellipseObst);
+    }
+
+    // back to obstacles
+    points.clear();
+    mode = M_OBSTACLE;
   }
 }
 
@@ -266,9 +309,11 @@ void BounceScene::generateObstacles () {
     Vect(view.left, view.bottom, 1.f), Vect(view.right, view.top, 1.f));
   obstacles.push_back(sceneObst);
 
+  /*
   auto ellipseObst = std::make_shared<EllipseObstacle>(
-    Vect(20, 20, 1.f), 100, 50);
+    Vect(50, 20, 1.f), 200, 50, 10);
   obstacles.push_back(ellipseObst);
+  */
 }
 
 void BounceScene::onResize (int width, int height) {

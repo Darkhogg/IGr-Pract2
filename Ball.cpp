@@ -26,13 +26,11 @@ void Ball::draw () const {
 
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
+  glTranslated(_pos.x(), _pos.y(), 0.d);
+  glScaled(radius, radius, 1.d);
+  glRotated(_ang, 0.d, 0.d, 1.d);
 
-  glLoadIdentity();
-  glTranslated(_pos.x(), _pos.y(), 0);
-  glScaled(radius, radius, 1);
-  glRotated(_ang, 0, 0, 1);
-
-  glColor3f(1, 1 ,1);
+  glColor3f(1.f, 1.f, 1.f);
   glBegin(GL_POLYGON);
   for (int i = 0; i < points; i++) {
     glVertex2f(cos(i * step), sin(i * step));
